@@ -9,6 +9,7 @@
 #define RECONSTRUCTOR_H_
 
 #include <opencv2/core/core.hpp>
+#include <opencv2/ml.hpp>
 #include <stddef.h>
 #include <vector>
 
@@ -45,6 +46,16 @@ private:
 	std::vector<Voxel*> m_voxels;           // Pointer vector to all voxels in the half-space
 	std::vector<Voxel*> m_visible_voxels;   // Pointer vector to all visible voxels
 
+
+	std::vector <cv::Scalar> colour_labels;
+
+	bool colour_model_made;
+
+
+	std::vector<cv::Ptr<cv::ml::EM>> gmm_predictors;
+
+
+
 	void initialize();
 
 public:
@@ -53,6 +64,10 @@ public:
 	virtual ~Reconstructor();
 
 	void update();
+
+	void GetColourModel(std::vector<Voxel*> visible_voxels, int num_labels, cv::Mat labels);
+
+
 
 	const std::vector<Voxel*>& getVisibleVoxels() const
 	{

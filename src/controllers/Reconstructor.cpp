@@ -153,8 +153,103 @@ namespace nl_uu_science_gmt
 				}
 			}
 		}
+
+
+
+		// set colours 
+
+		colour_labels.push_back(Scalar(255, 0, 0));
+		colour_labels.push_back(Scalar(0, 255, 0));
+		colour_labels.push_back(Scalar(0, 0, 255));
+		colour_labels.push_back(Scalar(100, 0, 255));
+
+		colour_model_made = false;
+
+
 		cout << "done!" << endl;
+
+
+
 	}
+
+
+
+	void Reconstructor::GetColourModel(std::vector<Voxel*> visible_voxels, int num_labels, Mat labels) {
+	
+		// threshold to get rid of lower body (mostly same for all)
+		float thresh = 30.0f;
+
+		// counts for each lable
+		vector <int> counts(num_labels, 0);
+
+		// reference frame from cam 1
+		Mat ref = m_cameras[1]->m_frame;
+
+		cout << "Type " << ref.type() << endl;
+
+		// get counts
+		for (int i = 0; i < visible_voxels.size(); i++) {
+
+			// if above threshold
+			if (visible_voxels[i]->z > thresh) {
+			
+				int flag = labels.at<int>(i); // get label
+				counts[i]++;
+			}
+		}
+
+		// create traing data
+		vector <Mat> colour_coords;
+		for (int i = 0; i < num_labels; i++) {
+
+			colour_coords.push_back(Mat(counts[i], 3, CV_64F));
+			counts[i] = 0; // reset counts
+		}
+
+		// get coordinates
+		for (int i = 0; i < visible_voxels.size(); i++) {
+			if (visible_voxels[i]->z > thresh) {
+				int flag = labels.at<int>(i);
+
+				// get pixel of voxel on camera 2
+				Point pixel = visible_voxels[i]->camera_projection[1];
+				Vec3f colour = ref.at<Vec3f>(pixel); // colour of pixel
+
+				// save to material
+				colour_coords[flag].at<float>(counts[flag], 0);
+				colour_coords[flag].at<float>(counts[flag], 1);
+				colour_coords[flag].at<float>(counts[flag], 2);
+
+				counts[flag]++;
+			}
+		}
+
+		/*
+		for (int i = 0; i < colour_coords.size(); i++) {
+			cout << i << " Size " << colour_coords[i].size() << endl;
+		
+			
+			try {
+				gmm_predictors.push_back(cv::ml::EM::create());
+
+				gmm_predictors[i]->trainEM(colour_coords[i]);
+			}
+			catch (Exception& e) {
+			
+				cerr << e.msg << endl;
+			
+			}
+		
+		}
+			*/
+		colour_model_made = true;
+	}
+
+
+
+
+
+
 
 	/**
 	 * Count the amount of camera's each voxel in the space appears on,
@@ -164,14 +259,14 @@ namespace nl_uu_science_gmt
 	void Reconstructor::update()
 	{
 		m_visible_voxels.clear();
-		std::vector<Voxel *> visible_voxels;
+		std::vector<Voxel*> visible_voxels;
 
 		int v;
 #pragma omp parallel for schedule(static) private(v) shared(visible_voxels)
 		for (v = 0; v < (int)m_voxels_amount; ++v)
 		{
 			int camera_counter = 0;
-			Voxel *voxel = m_voxels[v];
+			Voxel* voxel = m_voxels[v];
 
 			for (size_t c = 0; c < m_cameras.size(); ++c)
 			{
@@ -194,6 +289,9 @@ namespace nl_uu_science_gmt
 		}
 
 		m_visible_voxels.insert(m_visible_voxels.end(), visible_voxels.begin(), visible_voxels.end());
+
+
+
 		vector<Point2f> m_groundCoordinates(m_visible_voxels.size());
 		vector<Point3f> m_coordinates(m_visible_voxels.size());
 
@@ -204,20 +302,24 @@ namespace nl_uu_science_gmt
 		}
 		Mat labels;
 		vector<Point2f> centers;
+
 		kmeans(m_groundCoordinates, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
+
+
+		if (colour_model_made) {
+			
+		}
+		else {
+			GetColourModel(visible_voxels, 4, labels);
+		
+		}
+
+
 		for (int j = 0; j < m_groundCoordinates.size(); j++)
 		{
 			int flag = labels.at<int>(j);
-			if (flag == 0)
-			{
-				m_visible_voxels[j]->color = Scalar(255, 0, 0);
-			}
-			if (flag == 1)
-				m_visible_voxels[j]->color = Scalar(0, 255, 0);
-			if (flag == 2)
-				m_visible_voxels[j]->color = Scalar(0, 0, 255);
-			if (flag == 3)
-				m_visible_voxels[j]->color = Scalar(100, 0, 255);
+			m_visible_voxels[j]->color = colour_labels[flag];
+	
 		}
 		Mat frame = m_cameras[0]->getFrame();
 		Mat foreground= m_cameras[0]->getForegroundImage();
@@ -227,13 +329,24 @@ namespace nl_uu_science_gmt
 		Mat temp;
 		projectPoints(m_coordinates, m_cameras[0]->m_rotation_values, m_cameras[0]->m_translation_values, m_cameras[0]->m_camera_matrix,m_cameras[0]->m_distortion_coeffs, imagepoints, noArray(), 0);
 		resize(imagepoints,newres,Size(644,486));
-		cout<<newres.type()<<endl;
+		//cout<<newres.type()<<endl;
 		newres.convertTo(temp, CV_8U);
 		
+		/*
+		try {
 		bitwise_or(frame, frame, result,temp);
-		imshow("hey",result);
 
+		
+			imshow("hey",result);
+		}
+		catch (Exception& e)
+		{
+			cerr << e.msg << endl; // output exception message
+
+		};*/
 	
 	}
+
+
 
 } /* namespace nl_uu_science_gmt */
