@@ -215,9 +215,9 @@ namespace nl_uu_science_gmt
 
 
 
-		erode(fgmask, fgmask, getStructuringElement(0,Size(3, 3)) );
+		erode(fgmask, fgmask, getStructuringElement(0,Size(5, 5)) );
 
-		dilate(fgmask, fgmask, getStructuringElement(0, Size(2, 2)) );
+		dilate(fgmask, fgmask, getStructuringElement(0, Size(5, 5)) );
 
 
 		camera->setForegroundImage(fgmask);
