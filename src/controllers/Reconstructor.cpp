@@ -228,11 +228,9 @@ namespace nl_uu_science_gmt
 			}
 		}
 
-		/*
 		for (int i = 0; i < colour_coords.size(); i++) {
 			cout << i << " Size " << colour_coords[i].size() << endl;
-		
-			
+					
 			try {
 				gmm_predictors.push_back(cv::ml::EM::create());
 
@@ -240,19 +238,12 @@ namespace nl_uu_science_gmt
 			}
 			catch (Exception& e) {
 			
-				cerr << e.msg << endl;
-			
-			}
-		
+				cerr << e.msg << endl;	
+			}	
 		}
-			*/
-
+	
 		cout << "Colour model created" << endl;
-
 		colour_model_made = true;
-
-
-
 	}
 
 
