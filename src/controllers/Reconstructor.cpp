@@ -194,13 +194,15 @@ namespace nl_uu_science_gmt
 			if (visible_voxels[i]->z > thresh) {
 			
 				int flag = labels.at<int>(i); // get label
-				counts[i]++;
+				counts[flag]++;
 			}
 		}
 
 		// create traing data
 		vector <Mat> colour_coords;
 		for (int i = 0; i < num_labels; i++) {
+
+			cout << "Cluster " << i << " with " << counts[i] << " voxels" << endl;
 
 			colour_coords.push_back(Mat(counts[i], 3, CV_64F));
 			counts[i] = 0; // reset counts
@@ -219,6 +221,8 @@ namespace nl_uu_science_gmt
 				colour_coords[flag].at<float>(counts[flag], 0);
 				colour_coords[flag].at<float>(counts[flag], 1);
 				colour_coords[flag].at<float>(counts[flag], 2);
+
+				//cout << counts[flag] << endl;
 
 				counts[flag]++;
 			}
@@ -242,7 +246,13 @@ namespace nl_uu_science_gmt
 		
 		}
 			*/
+
+		cout << "Colour model created" << endl;
+
 		colour_model_made = true;
+
+
+
 	}
 
 
@@ -321,17 +331,22 @@ namespace nl_uu_science_gmt
 			m_visible_voxels[j]->color = colour_labels[flag];
 	
 		}
+		
 		Mat frame = m_cameras[0]->getFrame();
 		Mat foreground= m_cameras[0]->getForegroundImage();
+
+
+
+		
 		Mat result;
-	Mat newres;
+		Mat newres;
 		Mat imagepoints;
 		Mat temp;
 		projectPoints(m_coordinates, m_cameras[0]->m_rotation_values, m_cameras[0]->m_translation_values, m_cameras[0]->m_camera_matrix,m_cameras[0]->m_distortion_coeffs, imagepoints, noArray(), 0);
 		resize(imagepoints,newres,Size(644,486));
 		//cout<<newres.type()<<endl;
 		newres.convertTo(temp, CV_8U);
-		
+
 		/*
 		try {
 		bitwise_or(frame, frame, result,temp);
