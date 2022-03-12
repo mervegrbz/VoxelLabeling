@@ -75,10 +75,10 @@ namespace nl_uu_science_gmt
 	void Reconstructor::initialize()
 	{
 		// Cube dimensions from [(-m_height, m_height), (-m_height, m_height), (0, m_height)]
-		const int xL = -m_height;
-		const int xR = m_height;
-		const int yL = -m_height;
-		const int yR = m_height;
+		const int xL = -m_height - 200;
+		const int xR = m_height - 200;
+		const int yL = -m_height + 200;
+		const int yR = m_height + 200;
 		const int zL = 0;
 		const int zR = m_height;
 		const int plane_y = (yR - yL) / m_step;
@@ -154,10 +154,7 @@ namespace nl_uu_science_gmt
 			}
 		}
 
-
-
 		// set colours 
-
 		colour_labels.push_back(Scalar(255, 0, 0));
 		colour_labels.push_back(Scalar(0, 255, 0));
 		colour_labels.push_back(Scalar(0, 0, 255));
@@ -165,11 +162,7 @@ namespace nl_uu_science_gmt
 
 		colour_model_made = false;
 
-
 		cout << "done!" << endl;
-
-
-
 	}
 
 
@@ -177,15 +170,18 @@ namespace nl_uu_science_gmt
 	void Reconstructor::GetColourModel(std::vector<Voxel*> visible_voxels, int num_labels, Mat labels) {
 	
 		// threshold to get rid of lower body (mostly same for all)
-		float thresh = 30.0f;
+		float thresh = static_cast<float>(m_height) / 2;
 
 		// counts for each lable
 		vector <int> counts(num_labels, 0);
 
 		// reference frame from cam 1
-		Mat ref = m_cameras[1]->m_frame;
 
-		cout << "Type " << ref.type() << endl;
+		int cam = 1;
+
+		Mat ref = m_cameras[cam]->getFrame();
+
+		imshow("Reference", ref);
 
 		// get counts
 		for (int i = 0; i < visible_voxels.size(); i++) {
@@ -204,22 +200,31 @@ namespace nl_uu_science_gmt
 
 			cout << "Cluster " << i << " with " << counts[i] << " voxels" << endl;
 
-			colour_coords.push_back(Mat(counts[i], 3, CV_64F));
+			colour_coords.push_back(Mat(counts[i], 3, CV_64FC1));
 			counts[i] = 0; // reset counts
 		}
+
+
+
 
 		// get coordinates
 		for (int i = 0; i < visible_voxels.size(); i++) {
 			if (visible_voxels[i]->z > thresh) {
 				int flag = labels.at<int>(i);
 				// get pixel of voxel on camera 2
-				Point pixel = visible_voxels[i]->camera_projection[1];
-				Vec3f colour = ref.at<Vec3f>(pixel); // colour of pixel
+				Point pixel = visible_voxels[i]->camera_projection[cam];
+	
+
+				Vec3b rgb = ref.at<Vec3b>(pixel.x, pixel.y);
+				//cout << rgb << endl;
+
 				// save to material
-				colour_coords[flag].at<float>(counts[flag], 0);
-				colour_coords[flag].at<float>(counts[flag], 1);
-				colour_coords[flag].at<float>(counts[flag], 2);
-				//cout << counts[flag] << endl;
+				colour_coords[flag].at<double>(counts[flag], 0) = static_cast<int>(rgb[0]);
+				colour_coords[flag].at<double>(counts[flag], 1) = static_cast<int>(rgb[1]);
+				colour_coords[flag].at<double>(counts[flag], 2) = static_cast<int>(rgb[2]);
+
+
+
 				counts[flag]++;
 			}
 		}
@@ -227,10 +232,19 @@ namespace nl_uu_science_gmt
 		for (int i = 0; i < colour_coords.size(); i++) {
 			cout << i << " Size " << colour_coords[i].size() << endl;
 					
+
+			cout << "Colour " << colour_coords[i].at<double>(counts[i], 0) << endl;
+
+			
 			try {
+				
 				gmm_predictors.push_back(cv::ml::EM::create());
 
+				gmm_predictors[i]->setClustersNumber(1);
+
 				gmm_predictors[i]->trainEM(colour_coords[i]);
+
+
 			}
 			catch (Exception& e) {
 			
@@ -250,76 +264,7 @@ namespace nl_uu_science_gmt
 
 	void Reconstructor::PredictColourModel(std::vector<Voxel*> visible_voxels, int num_labels, Mat labels) {
 		
-
-		// threshold to get rid of lower body (mostly same for all)
-		float thresh = 30.0f;
-
-		// counts for each lable
-		vector <int> counts(num_labels, 0);
-
-		// reference frame from cam 1
-		Mat ref = m_cameras[1]->m_frame;
-
-
-		// get counts
-		for (int i = 0; i < visible_voxels.size(); i++) {
-
-			// if above threshold
-			if (visible_voxels[i]->z > thresh) {
-
-				int flag = labels.at<int>(i); // get label
-				counts[flag]++;
-			}
-		}
-
-		// create traing data
-		vector <Mat> colour_coords;
-		for (int i = 0; i < num_labels; i++) {
-			colour_coords.push_back(Mat(counts[i], 3, CV_64F));
-			counts[i] = 0; // reset counts
-		}
-
-		// get coordinates
-		for (int i = 0; i < visible_voxels.size(); i++) {
-			if (visible_voxels[i]->z > thresh) {
-				int flag = labels.at<int>(i);
-				// get pixel of voxel on camera 2
-				Point pixel = visible_voxels[i]->camera_projection[1];
-				Vec3f colour = ref.at<Vec3f>(pixel); // colour of pixel
-				// save to material
-				colour_coords[flag].at<float>(counts[flag], 0);
-				colour_coords[flag].at<float>(counts[flag], 1);
-				colour_coords[flag].at<float>(counts[flag], 2);
-				//cout << counts[flag] << endl;
-				counts[flag]++;
-			}
-		}
-
-
-
-
-		for (int i = 0; i < colour_coords.size(); i++) {
-			//cout << i << " Size " << colour_coords[i].size() << endl;
-
-
-			vector<float> predicitons(gmm_predictors.size(), 0.0f);
-
-			for (int j = 0; j < gmm_predictors.size(); j++) {
-			
-				/*
-
-				Mat results;
-				try{
-					gmm_predictors[j]->predict2(colour_coords[i], results);
-				}
-				catch (Exception& e) {
-
-					cerr << e.msg << endl;
-				}
-				*/
-			}
-		}
-
+		// implement later
 	
 	}
 
@@ -423,6 +368,10 @@ namespace nl_uu_science_gmt
 			cerr << e.msg << endl; // output exception message
 
 		};*/
+
+
+
+		
 	
 	}
 
