@@ -66,7 +66,7 @@ public:
 	void update();
 
 	void GetColourModel(std::vector<Voxel*> visible_voxels, int num_labels, cv::Mat labels);
-
+	void PredictColourModel(std::vector<Voxel*> visible_voxels, int num_labels, cv::Mat labels);
 
 
 	const std::vector<Voxel*>& getVisibleVoxels() const

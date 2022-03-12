@@ -212,18 +212,14 @@ namespace nl_uu_science_gmt
 		for (int i = 0; i < visible_voxels.size(); i++) {
 			if (visible_voxels[i]->z > thresh) {
 				int flag = labels.at<int>(i);
-
 				// get pixel of voxel on camera 2
 				Point pixel = visible_voxels[i]->camera_projection[1];
 				Vec3f colour = ref.at<Vec3f>(pixel); // colour of pixel
-
 				// save to material
 				colour_coords[flag].at<float>(counts[flag], 0);
 				colour_coords[flag].at<float>(counts[flag], 1);
 				colour_coords[flag].at<float>(counts[flag], 2);
-
 				//cout << counts[flag] << endl;
-
 				counts[flag]++;
 			}
 		}
@@ -240,6 +236,9 @@ namespace nl_uu_science_gmt
 			
 				cerr << e.msg << endl;	
 			}	
+
+
+			if (gmm_predictors[i]->isTrained()) cout << "Model " << i << " is trained" << endl;
 		}
 	
 		cout << "Colour model created" << endl;
@@ -248,6 +247,81 @@ namespace nl_uu_science_gmt
 
 
 
+
+	void Reconstructor::PredictColourModel(std::vector<Voxel*> visible_voxels, int num_labels, Mat labels) {
+		
+
+		// threshold to get rid of lower body (mostly same for all)
+		float thresh = 30.0f;
+
+		// counts for each lable
+		vector <int> counts(num_labels, 0);
+
+		// reference frame from cam 1
+		Mat ref = m_cameras[1]->m_frame;
+
+
+		// get counts
+		for (int i = 0; i < visible_voxels.size(); i++) {
+
+			// if above threshold
+			if (visible_voxels[i]->z > thresh) {
+
+				int flag = labels.at<int>(i); // get label
+				counts[flag]++;
+			}
+		}
+
+		// create traing data
+		vector <Mat> colour_coords;
+		for (int i = 0; i < num_labels; i++) {
+			colour_coords.push_back(Mat(counts[i], 3, CV_64F));
+			counts[i] = 0; // reset counts
+		}
+
+		// get coordinates
+		for (int i = 0; i < visible_voxels.size(); i++) {
+			if (visible_voxels[i]->z > thresh) {
+				int flag = labels.at<int>(i);
+				// get pixel of voxel on camera 2
+				Point pixel = visible_voxels[i]->camera_projection[1];
+				Vec3f colour = ref.at<Vec3f>(pixel); // colour of pixel
+				// save to material
+				colour_coords[flag].at<float>(counts[flag], 0);
+				colour_coords[flag].at<float>(counts[flag], 1);
+				colour_coords[flag].at<float>(counts[flag], 2);
+				//cout << counts[flag] << endl;
+				counts[flag]++;
+			}
+		}
+
+
+
+
+		for (int i = 0; i < colour_coords.size(); i++) {
+			//cout << i << " Size " << colour_coords[i].size() << endl;
+
+
+			vector<float> predicitons(gmm_predictors.size(), 0.0f);
+
+			for (int j = 0; j < gmm_predictors.size(); j++) {
+			
+				/*
+
+				Mat results;
+				try{
+					gmm_predictors[j]->predict2(colour_coords[i], results);
+				}
+				catch (Exception& e) {
+
+					cerr << e.msg << endl;
+				}
+				*/
+			}
+		}
+
+	
+	}
 
 
 
@@ -308,11 +382,10 @@ namespace nl_uu_science_gmt
 
 
 		if (colour_model_made) {
-			
+			PredictColourModel(visible_voxels, 4, labels);
 		}
 		else {
 			GetColourModel(visible_voxels, 4, labels);
-		
 		}
 
 
