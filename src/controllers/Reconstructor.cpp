@@ -160,6 +160,9 @@ namespace nl_uu_science_gmt
 		colour_labels.push_back(Scalar(0, 0, 255));
 		colour_labels.push_back(Scalar(100, 0, 255));
 
+
+		assigned_labels = vector<int>(4, 0);
+
 		colour_model_made = false;
 
 		cout << "done!" << endl;
@@ -167,7 +170,7 @@ namespace nl_uu_science_gmt
 
 
 
-	void Reconstructor::GetColourModel(std::vector<Voxel*> visible_voxels, int num_labels, Mat labels) {
+	void Reconstructor::GetColourModel(std::vector<Voxel*> visible_voxels, int const num_labels, Mat labels) {
 	
 		// threshold to get rid of lower body (mostly same for all)
 		float thresh = static_cast<float>(m_height) / 2;
@@ -178,7 +181,6 @@ namespace nl_uu_science_gmt
 		// reference frame from cam 1
 
 		int cam = 1;
-
 		Mat ref = m_cameras[cam]->getFrame();
 
 		imshow("Reference", ref);
@@ -193,7 +195,6 @@ namespace nl_uu_science_gmt
 				counts[flag]++;
 			}
 		}
-
 		// create traing data
 		vector <Mat> colour_coords;
 		for (int i = 0; i < num_labels; i++) {
@@ -205,8 +206,6 @@ namespace nl_uu_science_gmt
 		}
 
 
-
-
 		// get coordinates
 		for (int i = 0; i < visible_voxels.size(); i++) {
 			if (visible_voxels[i]->z > thresh) {
@@ -214,57 +213,129 @@ namespace nl_uu_science_gmt
 				// get pixel of voxel on camera 2
 				Point pixel = visible_voxels[i]->camera_projection[cam];
 	
-
 				Vec3b rgb = ref.at<Vec3b>(pixel.x, pixel.y);
-				//cout << rgb << endl;
+
 
 				// save to material
 				colour_coords[flag].at<double>(counts[flag], 0) = static_cast<int>(rgb[0]);
 				colour_coords[flag].at<double>(counts[flag], 1) = static_cast<int>(rgb[1]);
 				colour_coords[flag].at<double>(counts[flag], 2) = static_cast<int>(rgb[2]);
 
-
-
 				counts[flag]++;
 			}
 		}
-
 		for (int i = 0; i < colour_coords.size(); i++) {
-			cout << i << " Size " << colour_coords[i].size() << endl;
-					
+			cout << i << " Size " << colour_coords[i].size() << endl;			
+			//cout << "Colour " << colour_coords[i].at<double>(counts[i], 0) << endl;
+	
+			assigned_labels[i] = i;
 
-			cout << "Colour " << colour_coords[i].at<double>(counts[i], 0) << endl;
-
-			
+			//cout << assigned_labels[i] << endl;
 			try {
 				
 				gmm_predictors.push_back(cv::ml::EM::create());
-
 				gmm_predictors[i]->setClustersNumber(1);
-
 				gmm_predictors[i]->trainEM(colour_coords[i]);
-
-
 			}
-			catch (Exception& e) {
-			
+			catch (Exception& e) {		
 				cerr << e.msg << endl;	
 			}	
-
-
 			if (gmm_predictors[i]->isTrained()) cout << "Model " << i << " is trained" << endl;
 		}
-	
 		cout << "Colour model created" << endl;
 		colour_model_made = true;
 	}
 
 
 
+	void Reconstructor::PredictColourModel(std::vector<Voxel*> visible_voxels, int const num_labels, Mat labels) {
 
-	void Reconstructor::PredictColourModel(std::vector<Voxel*> visible_voxels, int num_labels, Mat labels) {
-		
-		// implement later
+		// threshold to get rid of lower body (mostly same for all)
+		float thresh = static_cast<float>(m_height) / 2;
+
+		// counts for each lable
+		vector <int> counts(num_labels, 0);
+		vector < vector<double>> totals(num_labels, vector<double>(num_labels, 0.0)); // total predictins for each label
+		// reference frame from cam 1
+
+		int cam = 1;
+
+		Mat ref = m_cameras[cam]->getFrame();
+
+		imshow("Reference", ref);
+
+
+		Mat sample(1, 3, CV_64FC1);//
+
+		// get counts
+		for (int i = 0; i < visible_voxels.size(); i++) {
+
+			// if above threshold
+			if (visible_voxels[i]->z > thresh) {
+
+				int flag = labels.at<int>(i); // get label
+
+				// get pixel of voxel on camera 2
+				Point pixel = visible_voxels[i]->camera_projection[cam];
+				Vec3b rgb = ref.at<Vec3b>(pixel.x, pixel.y);
+
+				Mat sample(1, 3, CV_64FC1);//
+
+				sample.at<double>(0, 0) = static_cast<double>(rgb[0]);
+				sample.at<double>(0, 1) = static_cast<double>(rgb[1]);
+				sample.at<double>(0, 2) = static_cast<double>(rgb[2]);
+
+
+				for (int j = 0; j < num_labels; j++) {
+
+					totals[flag][j] += gmm_predictors[j]->predict2(sample, noArray())[0];
+
+				}
+				counts[flag]++;
+
+			}
+		}
+
+		vector<bool> is_taken(num_labels, false);
+
+
+		// for every model
+		for (int m = 0; m < num_labels; m++) {
+			
+			cout << "Group " << m << " with " << counts[m] << " pixels" << endl;
+
+
+			double best_pred = -1000000.0;
+			double pred_index = -1;
+
+			// for every prediciton
+			for (int p = 0; p < num_labels; p++) {
+				
+				if (!is_taken[p]) {
+					
+					// get average
+
+
+
+
+					double new_pred = totals[m][p] / static_cast<double>(counts[m]);
+
+					//cout << counts[m] << " " << totals[m][p] << endl;
+					//cout << best_pred << " " << new_pred << " "<< (new_pred > best_pred) << endl;
+
+					if (new_pred > best_pred) {
+						//cout << "boop" << endl;
+						best_pred = new_pred;
+						pred_index = p;
+					}	
+				}
+			}
+
+			if (pred_index > -1) {
+				is_taken[pred_index] = true;
+				assigned_labels[m] = pred_index;
+			}
+		}
 	
 	}
 
@@ -337,8 +408,8 @@ namespace nl_uu_science_gmt
 		for (int j = 0; j < m_groundCoordinates.size(); j++)
 		{
 			int flag = labels.at<int>(j);
-			m_visible_voxels[j]->color = colour_labels[flag];
-	
+			m_visible_voxels[j]->color = colour_labels[assigned_labels[flag]];
+
 		}
 		
 		Mat frame = m_cameras[0]->getFrame();

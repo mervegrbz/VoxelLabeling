@@ -47,7 +47,9 @@ private:
 	std::vector<Voxel*> m_visible_voxels;   // Pointer vector to all visible voxels
 
 
-	std::vector <cv::Scalar> colour_labels;
+	std::vector <cv::Scalar> colour_labels; // colour of the labels
+	std::vector <int> assigned_labels; // which colour each model gets
+
 
 	bool colour_model_made;
 
@@ -65,8 +67,8 @@ public:
 
 	void update();
 
-	void GetColourModel(std::vector<Voxel*> visible_voxels, int num_labels, cv::Mat labels);
-	void PredictColourModel(std::vector<Voxel*> visible_voxels, int num_labels, cv::Mat labels);
+	void GetColourModel(std::vector<Voxel*> visible_voxels, int const num_labels, cv::Mat labels);
+	void PredictColourModel(std::vector<Voxel*> visible_voxels, int const num_labels, cv::Mat labels);
 
 
 	const std::vector<Voxel*>& getVisibleVoxels() const
