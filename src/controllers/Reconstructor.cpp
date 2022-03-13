@@ -12,7 +12,7 @@
 #include <opencv2/core/types_c.h>
 #include <cassert>
 #include <iostream>
-
+#include <opencv2/opencv.hpp>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/core_c.h>
@@ -156,6 +156,145 @@ namespace nl_uu_science_gmt
 		cout << "done!" << endl;
 	}
 
+	void Reconstructor::offlinePhase()
+	{
+		vector<Point2f> m_groundCoordinates(m_visible_voxels.size());
+		vector<Point3f> m_coordinates(m_visible_voxels.size());
+
+		for (int i = 0; i < (int)m_visible_voxels.size(); i++)
+		{
+			m_groundCoordinates[i] = Point2f(m_visible_voxels[i]->x, m_visible_voxels[i]->y);
+			m_coordinates[i] = Point3f(m_visible_voxels[i]->x, m_visible_voxels[i]->y, m_visible_voxels[i]->z);
+		}
+		Mat labels;
+
+		vector<Mat> clusters(4);
+		vector<Point2f> centers;
+		kmeans(m_groundCoordinates, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
+		for (int j = 0; j < m_groundCoordinates.size(); j++)
+		{
+			int flag = labels.at<int>(j);
+			clusters[flag].push_back(Point3d(m_visible_voxels[j]->x, m_visible_voxels[j]->y, m_visible_voxels[j]->z));
+		}
+		Mat frame = imread(m_cameras[0]->getDataPath() + "video.png");
+		resize(frame,frame,Size(644,486));
+		vector<Point2d> imagepoints;
+		vector<vector<cv::Point2d>> imagepointList;
+		int width = frame.cols;
+		int height = frame.rows;
+		int dims = frame.channels();
+		int nsamples = width * height;
+		Mat result = Mat::zeros(Size(644, 486), CV_8UC3);
+		for (int j = 0; j < 4; j++)
+		{
+			projectPoints(clusters[j], m_cameras[0]->m_rotation_values, m_cameras[0]->m_translation_values, m_cameras[0]->m_camera_matrix, m_cameras[0]->m_distortion_coeffs, imagepoints, noArray(), 0);
+			imagepointList.push_back(imagepoints);
+			Mat points(nsamples, dims, CV_64FC1);
+			int cov_mat_type = cv::ml::EM::COV_MAT_GENERIC;
+			for (int i = 0; i < imagepoints.size(); i++)
+			{
+				double row = imagepoints[i].y;
+				double col = imagepoints[i].x;
+				Vec3b rgb = frame.at<Vec3b>(row, col);
+				if(col<200)
+				continue;
+				points.at<double>(i, 0) = static_cast<int>(rgb[0]);
+				points.at<double>(i, 1) = static_cast<int>(rgb[1]);
+				points.at<double>(i, 2) = static_cast<int>(rgb[2]);
+				result.at<Vec3b>(row, col)[0] = rgb[0];
+				result.at<Vec3b>(row, col)[1] = rgb[1];
+				result.at<Vec3b>(row, col)[2] = rgb[2];
+			}
+			imshow("EM-Segmentation", result);
+			Mat notUsed;
+			waitKey(0);
+			cv::TermCriteria term(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 15000, 1e-6);
+			Ptr<cv::ml::EM> gmm = cv::ml::EM::create();
+			gmm->setClustersNumber(2);
+			gmm->setTermCriteria(term);
+			gmm->trainEM(points, noArray(), notUsed, noArray());
+			Gmms.push_back(gmm);
+		}
+
+		Scalar color_tab[] = {
+			Scalar(255, 0, 0),
+			Scalar(0, 255, 0),
+			Scalar(0, 0, 255),
+			Scalar(255, 0, 255),
+		};
+		vector<int> matches(4, -1);
+		// iterate over gmms
+		for (int gm = 0; gm < 4; gm++)
+		{
+			int person = 0;
+			double mostprob = 10000;
+			Ptr<cv::ml::EM> gmm = Gmms[gm];
+			// iterate over people
+			for (int m = 0; m < 4; m++)
+			{
+				vector<Point2d> newpoints = imagepointList[m];
+
+				vector<Mat> samples;
+				Mat sample(1, 3, CV_64FC1);
+
+				double r = 0, g = 0, b = 0;
+				double totaldist = 0;
+				for (int i = 0; i < newpoints.size(); i++)
+				{
+					// Get the color of each channel
+					double row = newpoints[i].y;
+					double col = newpoints[i].x;
+					Vec3b rgb = frame.at<Vec3b>(row, col);
+					b = (rgb[2]);
+					g = (rgb[1]);
+					r = (rgb[0]);
+					
+					// Put pixels in sample data
+					sample.at<double>(0, 0) = static_cast<double>(r);
+					sample.at<double>(0, 1) = static_cast<double>(g);
+					sample.at<double>(0, 2) = static_cast<double>(b);
+					totaldist += gmm->predict2(sample, noArray())[0];
+					samples.push_back(sample);
+				}
+
+				if (mostprob > abs(totaldist / samples.size()))
+				{
+					if (matches[m] != -1)
+					{
+						continue;
+					}
+					person = m;
+					mostprob = abs(totaldist / samples.size());
+				}
+			}
+			matches[person] = gm;
+		}
+		// iterate over person
+		for (int h = 0; h < 4; h++)
+		{
+
+			int gm = matches[h];
+			cout << gm << "this is the person I label" << h << endl;
+			for (int r = 0; r < imagepointList[h].size(); r++)
+			{
+				double row = imagepointList[h][r].y;
+				double col = imagepointList[h][r].x;
+				Scalar c = color_tab[gm];
+				result.at<Vec3b>(row, col)[0] = c[0];
+				result.at<Vec3b>(row, col)[1] = c[1];
+				result.at<Vec3b>(row, col)[2] = c[2];
+			}
+		}
+
+		for (int j = 0; j < m_groundCoordinates.size(); j++)
+		{
+			int flag = labels.at<int>(j);
+			m_visible_voxels[j]->color = color_tab[matches[flag]];
+		}
+		imshow("EM-Segmentation", result);
+		waitKey();
+	};
+
 	/**
 	 * Count the amount of camera's each voxel in the space appears on,
 	 * if that amount equals the amount of cameras, add that voxel to the
@@ -192,8 +331,13 @@ namespace nl_uu_science_gmt
 				visible_voxels.push_back(voxel);
 			}
 		}
-
 		m_visible_voxels.insert(m_visible_voxels.end(), visible_voxels.begin(), visible_voxels.end());
+
+		if (!isTrained)
+		{
+			offlinePhase();
+			isTrained = true;
+		}
 		vector<Point2f> m_groundCoordinates(m_visible_voxels.size());
 		vector<Point3f> m_coordinates(m_visible_voxels.size());
 
@@ -203,37 +347,104 @@ namespace nl_uu_science_gmt
 			m_coordinates[i] = Point3f(m_visible_voxels[i]->x, m_visible_voxels[i]->y, m_visible_voxels[i]->z);
 		}
 		Mat labels;
+		vector<Voxel> clusterpoints;
+		vector<vector<Point3d>> clusters(5);
 		vector<Point2f> centers;
+		vector<vector<cv::Point2d>> imagepointList;
 		kmeans(m_groundCoordinates, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
 		for (int j = 0; j < m_groundCoordinates.size(); j++)
 		{
 			int flag = labels.at<int>(j);
-			if (flag == 0)
-			{
-				m_visible_voxels[j]->color = Scalar(255, 0, 0);
-			}
-			if (flag == 1)
-				m_visible_voxels[j]->color = Scalar(0, 255, 0);
-			if (flag == 2)
-				m_visible_voxels[j]->color = Scalar(0, 0, 255);
-			if (flag == 3)
-				m_visible_voxels[j]->color = Scalar(100, 0, 255);
+			clusters[flag].push_back(Point3d(m_visible_voxels[j]->x, m_visible_voxels[j]->y, m_visible_voxels[j]->z));
+			clusters[4].push_back(Point3d(m_visible_voxels[j]->x, m_visible_voxels[j]->y, m_visible_voxels[j]->z));
+		}
+		for (int f = 0; f < 4; f++)
+		{
+			Mat imagepoints;
+			projectPoints(clusters[f], m_cameras[0]->m_rotation_values, m_cameras[0]->m_translation_values, m_cameras[0]->m_camera_matrix, m_cameras[0]->m_distortion_coeffs, imagepoints, noArray(), 0);
+			imagepointList.push_back(imagepoints);
 		}
 		Mat frame = m_cameras[0]->getFrame();
-		Mat foreground= m_cameras[0]->getForegroundImage();
-		Mat result;
-	Mat newres;
-		Mat imagepoints;
-		Mat temp;
-		projectPoints(m_coordinates, m_cameras[0]->m_rotation_values, m_cameras[0]->m_translation_values, m_cameras[0]->m_camera_matrix,m_cameras[0]->m_distortion_coeffs, imagepoints, noArray(), 0);
-		resize(imagepoints,newres,Size(644,486));
-		cout<<newres.type()<<endl;
-		newres.convertTo(temp, CV_8U);
-		
-		bitwise_or(frame, frame, result,temp);
-		imshow("hey",result);
+		resize(frame, frame, Size(644, 486));
+		Mat result = Mat::zeros(Size(644, 486), CV_8UC3);
 
-	
+		Scalar color_tab[] = {
+			Scalar(255, 0, 0),
+			Scalar(0, 255, 0),
+			Scalar(0, 0, 255),
+			Scalar(255, 0, 255),
+		};
+		vector<int> matches(4, -1);
+		// iterate over gmms
+		for (int gm = 0; gm < 4; gm++)
+		{
+			int person = 0;
+			double mostprob = 10000;
+			// iterate over people
+			for (int m = 0; m < 4; m++)
+			{
+				vector<Point2d> newpoints = imagepointList[m];
+
+				vector<Mat> samples;
+				Mat sample(1, 3, CV_64FC1);
+				Ptr<cv::ml::EM> gmm = Gmms[gm];
+				double r = 0, g = 0, b = 0;
+				double totaldist = 0;
+				for (int i = 0; i < newpoints.size(); i++)
+				{
+					// Get the color of each channel
+					double row = newpoints[i].y;
+					double col = newpoints[i].x;
+					if (col < 200)
+						continue;
+					Vec3b rgb = frame.at<Vec3b>(row, col);
+					b = (rgb[2]);
+					g = (rgb[1]);
+					r = (rgb[0]);
+
+					// Put pixels in sample data
+					sample.at<double>(0, 0) = static_cast<double>(r);
+					sample.at<double>(0, 1) = static_cast<double>(g);
+					sample.at<double>(0, 2) = static_cast<double>(b);
+					totaldist += gmm->predict2(sample, noArray())[0];
+					samples.push_back(sample);
+				}
+				if (mostprob > abs(totaldist / samples.size()))
+				{
+					if (matches[m] != -1)
+					{
+						continue;
+					}
+					person = m;
+					mostprob = abs(totaldist / samples.size());
+				}
+			}
+
+			matches[person] = gm;
+			cout << "bu kacinci gm" << gm << "bu kacinci insan" << person << endl;
+		}
+
+		for (int h = 0; h < 4; h++)
+		{
+			int gm = matches[h];
+			cout << h << "this is the person I label" << h << endl;
+			for (int r = 0; r < imagepointList[h].size(); r++)
+			{
+				double row = imagepointList[h][r].y;
+				double col = imagepointList[h][r].x;
+				Scalar c = color_tab[gm];
+				result.at<Vec3b>(row, col)[0] = c[0];
+				result.at<Vec3b>(row, col)[1] = c[1];
+				result.at<Vec3b>(row, col)[2] = c[2];
+			}
+		}
+		for (int j = 0; j < m_groundCoordinates.size(); j++)
+		{
+			int flag = labels.at<int>(j);
+
+			m_visible_voxels[j]->color = color_tab[matches[flag]];
+		}
+		imshow("EM-Segmentation", result);
 	}
 
 } /* namespace nl_uu_science_gmt */

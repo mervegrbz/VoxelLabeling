@@ -2,57 +2,57 @@
 <opencv_storage>
 <CornersAmount>48</CornersAmount>
 <Corner_0>
-  315 306</Corner_0>
+  316 307</Corner_0>
 <Corner_1>
-  324 310</Corner_1>
+  324 311</Corner_1>
 <Corner_2>
-  334 315</Corner_2>
+  334 316</Corner_2>
 <Corner_3>
-  343 320</Corner_3>
+  342 320</Corner_3>
 <Corner_4>
   353 326</Corner_4>
 <Corner_5>
-  363 330</Corner_5>
+  362 330</Corner_5>
 <Corner_6>
-  373 337</Corner_6>
+  374 337</Corner_6>
 <Corner_7>
-  383 342</Corner_7>
+  384 341</Corner_7>
 <Corner_8>
   305 310</Corner_8>
 <Corner_9>
-  314 315</Corner_9>
+  315 315</Corner_9>
 <Corner_10>
   323 320</Corner_10>
 <Corner_11>
-  331 325</Corner_11>
+  332 325</Corner_11>
 <Corner_12>
   342 330</Corner_12>
 <Corner_13>
-  351 335</Corner_13>
+  352 335</Corner_13>
 <Corner_14>
-  363 341</Corner_14>
+  362 341</Corner_14>
 <Corner_15>
-  373 347</Corner_15>
+  374 347</Corner_15>
 <Corner_16>
-  295 313</Corner_16>
+  295 315</Corner_16>
 <Corner_17>
-  305 319</Corner_17>
+  303 320</Corner_17>
 <Corner_18>
-  312 324</Corner_18>
+  313 325</Corner_18>
 <Corner_19>
-  321 328</Corner_19>
+  321 329</Corner_19>
 <Corner_20>
-  331 335</Corner_20>
+  332 336</Corner_20>
 <Corner_21>
-  340 341</Corner_21>
+  341 340</Corner_21>
 <Corner_22>
-  350 347</Corner_22>
+  352 347</Corner_22>
 <Corner_23>
-  362 352</Corner_23>
+  363 352</Corner_23>
 <Corner_24>
-  283 318</Corner_24>
+  283 319</Corner_24>
 <Corner_25>
-  292 324</Corner_25>
+  293 324</Corner_25>
 <Corner_26>
   301 329</Corner_26>
 <Corner_27>
@@ -60,41 +60,41 @@
 <Corner_28>
   319 340</Corner_28>
 <Corner_29>
-  329 346</Corner_29>
+  331 347</Corner_29>
 <Corner_30>
-  339 352</Corner_30>
+  340 351</Corner_30>
 <Corner_31>
-  350 357</Corner_31>
+  351 359</Corner_31>
 <Corner_32>
-  272 323</Corner_32>
+  273 324</Corner_32>
 <Corner_33>
-  282 329</Corner_33>
+  281 327</Corner_33>
 <Corner_34>
   289 334</Corner_34>
 <Corner_35>
-  297 339</Corner_35>
+  298 339</Corner_35>
 <Corner_36>
   309 346</Corner_36>
 <Corner_37>
-  317 351</Corner_37>
+  317 350</Corner_37>
 <Corner_38>
   327 358</Corner_38>
 <Corner_39>
-  337 364</Corner_39>
+  339 364</Corner_39>
 <Corner_40>
-  260 328</Corner_40>
+  261 328</Corner_40>
 <Corner_41>
-  270 334</Corner_41>
+  270 333</Corner_41>
 <Corner_42>
-  277 338</Corner_42>
+  277 339</Corner_42>
 <Corner_43>
-  285 344</Corner_43>
+  287 346</Corner_43>
 <Corner_44>
   295 350</Corner_44>
 <Corner_45>
-  305 358</Corner_45>
+  306 358</Corner_45>
 <Corner_46>
-  314 364</Corner_46>
+  316 365</Corner_46>
 <Corner_47>
-  326 371</Corner_47>
+  327 371</Corner_47>
 </opencv_storage>

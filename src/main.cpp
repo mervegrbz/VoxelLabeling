@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <string>
 #include <iostream>
-
+#include <opencv2/opencv.hpp>
 #include "utilities/General.h"
 #include "VoxelReconstruction.h"
 #include "opencv2/calib3d/calib3d.hpp"
@@ -30,7 +30,7 @@ void Calibrate_Cameras(int num_cams) {
     }
     TermCriteria criteria(TermCriteria::EPS | TermCriteria::MAX_ITER, 30, 0.001);
     const std::string cam_path = data_path + "cam";
-    cv::VideoCapture in_video;
+    VideoCapture in_video;
 	for (int v = 0; v < num_cams; ++v)
 	{
 	    stringstream full_path;
@@ -140,10 +140,6 @@ void Calibrate_Cameras(int num_cams) {
 int main(
 		int argc, char** argv)
 {
-
-
-
-
 	VoxelReconstruction::showKeys();
 	VoxelReconstruction vr(data_path, 4);
 	vr.run(argc, argv);

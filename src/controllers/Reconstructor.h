@@ -8,12 +8,28 @@
 #ifndef RECONSTRUCTOR_H_
 #define RECONSTRUCTOR_H_
 
-#include <opencv2/core/core.hpp>
+
 #include <stddef.h>
+#include <iostream>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/types_c.h>
+#include <cassert>
 #include <vector>
+#include <opencv2/core/types.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/core/core_c.h>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/operations.hpp>
+#include <opencv2/core/types_c.h>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/highgui/highgui_c.h>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/imgproc/types_c.h>
 
 #include "Camera.h"
-
+using namespace std;
 namespace nl_uu_science_gmt
 {
 
@@ -35,7 +51,8 @@ public:
 private:
 	const std::vector<Camera*> &m_cameras;  // vector of pointers to cameras
 	const int m_height;                     // Cube half-space height from floor to ceiling
-	const int m_step;                       // Step size (space between voxels)
+	const int m_step;
+	                       // Step size (space between voxels)
 
 	std::vector<cv::Point3f*> m_corners;    // Cube half-space corner locations
 
@@ -48,6 +65,9 @@ private:
 	void initialize();
 
 public:
+	
+	vector<cv::Ptr<cv::ml::EM>>Gmms;
+	bool isTrained=false;
 	Reconstructor(
 			const std::vector<Camera*> &);
 	virtual ~Reconstructor();
@@ -58,6 +78,7 @@ public:
 	{
 		return m_visible_voxels;
 	}
+	void offlinePhase();
 
 	const std::vector<Voxel*>& getVoxels() const
 	{
