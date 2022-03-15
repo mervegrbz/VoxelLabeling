@@ -196,8 +196,7 @@ namespace nl_uu_science_gmt
 				double row = imagepoints[i].y;
 				double col = imagepoints[i].x;
 				Vec3b rgb = frame.at<Vec3b>(row, col);
-				if(col<200)
-				continue;
+				
 				points.at<double>(i, 0) = static_cast<int>(rgb[0]);
 				points.at<double>(i, 1) = static_cast<int>(rgb[1]);
 				points.at<double>(i, 2) = static_cast<int>(rgb[2]);
@@ -333,11 +332,6 @@ namespace nl_uu_science_gmt
 		}
 		m_visible_voxels.insert(m_visible_voxels.end(), visible_voxels.begin(), visible_voxels.end());
 
-		if (!isTrained)
-		{
-			offlinePhase();
-			isTrained = true;
-		}
 		vector<Point2f> m_groundCoordinates(m_visible_voxels.size());
 		vector<Point3f> m_coordinates(m_visible_voxels.size());
 
@@ -346,9 +340,14 @@ namespace nl_uu_science_gmt
 			m_groundCoordinates[i] = Point2f(m_visible_voxels[i]->x, m_visible_voxels[i]->y);
 			m_coordinates[i] = Point3f(m_visible_voxels[i]->x, m_visible_voxels[i]->y, m_visible_voxels[i]->z);
 		}
+		if (!isTrained)
+		{
+			offlinePhase();
+			isTrained = true;
+		}
 		Mat labels;
 		vector<Voxel> clusterpoints;
-		vector<vector<Point3d>> clusters(5);
+		vector<vector<Point3d>> clusters(4);
 		vector<Point2f> centers;
 		vector<vector<cv::Point2d>> imagepointList;
 		kmeans(m_groundCoordinates, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
@@ -356,7 +355,7 @@ namespace nl_uu_science_gmt
 		{
 			int flag = labels.at<int>(j);
 			clusters[flag].push_back(Point3d(m_visible_voxels[j]->x, m_visible_voxels[j]->y, m_visible_voxels[j]->z));
-			clusters[4].push_back(Point3d(m_visible_voxels[j]->x, m_visible_voxels[j]->y, m_visible_voxels[j]->z));
+			
 		}
 		for (int f = 0; f < 4; f++)
 		{
@@ -395,8 +394,6 @@ namespace nl_uu_science_gmt
 					// Get the color of each channel
 					double row = newpoints[i].y;
 					double col = newpoints[i].x;
-					if (col < 200)
-						continue;
 					Vec3b rgb = frame.at<Vec3b>(row, col);
 					b = (rgb[2]);
 					g = (rgb[1]);
@@ -407,6 +404,7 @@ namespace nl_uu_science_gmt
 					sample.at<double>(0, 1) = static_cast<double>(g);
 					sample.at<double>(0, 2) = static_cast<double>(b);
 					totaldist += gmm->predict2(sample, noArray())[0];
+					cout<<gmm->predict2(sample, noArray())[1]<<endl;
 					samples.push_back(sample);
 				}
 				if (mostprob > abs(totaldist / samples.size()))

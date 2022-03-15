@@ -65,7 +65,7 @@ private:
 	void initialize();
 
 public:
-	
+	vector<vector<cv::Point2d>> imagepointList;
 	vector<cv::Ptr<cv::ml::EM>>Gmms;
 	bool isTrained=false;
 	Reconstructor(
