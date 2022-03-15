@@ -206,7 +206,23 @@ namespace nl_uu_science_gmt
 		// Improve the foreground image
 		Ptr<BackgroundSubtractor> pBackSub = (BackSubtractors[camera->getId()]);
 
-		pBackSub->apply(camera->getFrame(), camera->getForegroundImage(), 0);
+
+		Mat fgmask;
+
+
+		pBackSub->apply(camera->getFrame(), fgmask, 0);
+
+
+
+
+		erode(fgmask, fgmask, getStructuringElement(0,Size(5, 5)) );
+
+		dilate(fgmask, fgmask, getStructuringElement(0, Size(5, 5)) );
+
+
+		camera->setForegroundImage(fgmask);
+
+
 
 		rectangle(camera->getFrame(), cv::Point(10, 2), cv::Point(100, 20),
 				  cv::Scalar(255, 255, 255), -1);
@@ -217,7 +233,7 @@ namespace nl_uu_science_gmt
 		putText(camera->getFrame(), frameNumberString.c_str(), cv::Point(15, 15),
 				FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 0));
 		
-		camera->setForegroundImage(camera->getForegroundImage());
+		//camera->setForegroundImage(camera->getForegroundImage());
 		
 		
 	
