@@ -1,0 +1,156 @@
+﻿  Reconstructor.cpp
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(177,80): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(177,56): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(178,98): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(178,74): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(178,50): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(213,38): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(213,33): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(218,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(218,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(219,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(219,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(220,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(220,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(261,39): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(261,34): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(297,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(297,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(297,40): warning C4244: '=': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=uchar
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(298,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(298,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(298,40): warning C4244: '=': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=uchar
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(299,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(299,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(299,40): warning C4244: '=': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=uchar
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(355,80): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(355,56): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(356,98): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(356,74): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(356,50): warning C4244: 'argument': conversion from 'int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(412,39): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(412,34): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(449,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(449,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(449,40): warning C4244: '=': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=uchar
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(450,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(450,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(450,40): warning C4244: '=': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=uchar
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(451,27): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(451,22): warning C4244: 'argument': conversion from 'double' to 'int', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(451,40): warning C4244: '=': conversion from '_Tp' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=double
+          ]
+          and
+          [
+              _Tp=uchar
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(485,34): warning C4244: 'argument': conversion from 'const int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(485,24): warning C4244: 'argument': conversion from 'const int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(498,22): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(529,34): warning C4244: 'argument': conversion from 'const int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+C:\Users\chold\College Work\Computer Vision\VoxelLabeling\src\controllers\Reconstructor.cpp(529,24): warning C4244: 'argument': conversion from 'const int' to '_Tp', possible loss of data
+          with
+          [
+              _Tp=float
+          ]
+  Generating code
+  3 of 1675 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    1 functions were new in current compilation
+    3 functions had inline decision re-evaluated but remain unchanged
+  Finished generating code
+  VoxelReconstruction.vcxproj -> C:\Users\chold\College Work\Computer Vision\VoxelLabeling\x64\Release\VoxelReconstruction.exe

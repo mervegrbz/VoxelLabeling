@@ -464,11 +464,15 @@ namespace nl_uu_science_gmt
 
 		frame_count++;
 
-		if (frame_count > 24) {
+
+		// if uncomented, will do regular path tracing
+		//directions_found = false;
+
+
+
+		if (frame_count % 25 == 0) {
 
 			if (directions_found) {
-
-
 
 				for (int c = 0; c < last_centers.size(); c++) {
 
@@ -483,26 +487,28 @@ namespace nl_uu_science_gmt
 
 					for (int nc = 0; nc < matches.size(); nc++) {
 					
-						Vec2f new_vec(centers[nc] - last_centers[nc]);
+						Vec2f new_vec(centers[nc] - last_centers[c]);
 						new_vec = normalize(new_vec);
 
-						float dist = new_vec.dot(directions[c]); // normalized, magnitude should both be 1
+						float cosine_dist = 1  - new_vec.dot(directions[c]); // normalized, magnitude should both be 1
 
-						if (smallest_dist > dist) {
+
+						norm(centers[nc] - last_centers[c]);
+
+						float distance = norm(centers[nc] - last_centers[c]);
+
+
+						if (smallest_dist > (cosine_dist * distance * distance) ){
 							
 							direction = new_vec;
-							smallest_dist = dist;
+							smallest_dist = cosine_dist;
 							best_c = nc;
 						}
 					}
 
-
-
-					 
-
 					Scalar boop(100, 0, 0);
 
-					//cout << color_tab[c] << endl;
+					cout << (last_centers[c] + ajustment) / 8 << " " << (centers[best_c] + ajustment) / 8 << endl;
 
 					line(path_image, (last_centers[c] + ajustment) / 8, (centers[best_c] + ajustment) / 8, color_tab[c], 5, FILLED);
 
@@ -511,8 +517,10 @@ namespace nl_uu_science_gmt
 
 				}
 			}
+			// get first direction or do regular path finding
 			else {
 			
+
 
 				for (int c = 0; c < last_centers.size(); c++) {
 
@@ -520,12 +528,14 @@ namespace nl_uu_science_gmt
 
 					Point2f ajustment(m_height, m_height);
 
-					cout << (last_centers[c] + ajustment) / 8 << " " << (centers[gm] + ajustment) / 8 << endl;
+					cout << (last_centers[gm] + ajustment) / 8 << " " << (centers[c] + ajustment) / 8 << endl;
 
-					line(path_image, (last_centers[c] + ajustment) / 8, (centers[gm] + ajustment) / 8, color_tab[c], 10, FILLED);
+					line(path_image, (last_centers[gm] + ajustment) / 8, (centers[c] + ajustment) / 8, color_tab[gm], 2, LINE_AA);
+
+					last_centers[gm] = centers[c];
 
 					directions[c] = normalize(Vec2f(centers[gm] - last_centers[c]));
-					last_centers[c] = centers[gm];
+					last_centers[gm] = centers[c];
 
 					
 				}
@@ -533,12 +543,16 @@ namespace nl_uu_science_gmt
 				directions_found = true;
 			
 			}
-			frame_count = 0;
-
-
 			imshow("Path", path_image);
 
 		}
+
+		if (frame_count == 1000) {
+			
+			imwrite("path.png", path_image);
+		
+		}
+
 
 	}
 
