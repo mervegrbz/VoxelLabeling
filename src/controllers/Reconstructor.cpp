@@ -511,8 +511,8 @@ namespace nl_uu_science_gmt
 
 							float distance = norm(centers[nc] - last_centers[c]);
 
-
-							if (smallest_dist > (cosine_dist * distance * distance) ){
+							// cosine distnace by  1 -  1/distance
+							if ( smallest_dist > (cosine_dist * ( 1 - ( 1 /distance))) ){
 							
 								direction = new_vec;
 								smallest_dist = cosine_dist;
@@ -527,7 +527,7 @@ namespace nl_uu_science_gmt
 
 					cout << (last_centers[c] + ajustment) / 8 << " " << (centers[best_c] + ajustment) / 8 << endl;
 
-					line(path_image, (last_centers[c] + ajustment) / 8, (centers[best_c] + ajustment) / 8, color_tab[c], 5, FILLED);
+					line(path_image, (last_centers[c] + ajustment) / 8, (centers[best_c] + ajustment) / 8, color_tab[c], 2, FILLED);
 
 					last_centers[c] = centers[best_c];
 
