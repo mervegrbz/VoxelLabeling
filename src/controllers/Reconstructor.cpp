@@ -154,7 +154,7 @@ namespace nl_uu_science_gmt
 			}
 		}
 		try {
-		path_image = Mat(m_height/2, m_height/2, CV_8UC1);
+		path_image = Mat(m_height/4, m_height/4, CV_8UC3);
 
 		path_image = Scalar(255, 255, 255);
 
@@ -464,7 +464,7 @@ namespace nl_uu_science_gmt
 
 		frame_count++;
 
-		if (frame_count > 49) {
+		if (frame_count > 24) {
 
 			for (int c = 0; c < last_centers.size(); c++) {
 
@@ -472,11 +472,11 @@ namespace nl_uu_science_gmt
 
 				Point2f ajustment(m_height, m_height);
 
-				cout << (last_centers[c] + ajustment) / 4 << " " << (centers[gm] + ajustment) / 4 << endl;
+				cout << (last_centers[gm] + ajustment) / 8 << " " << (centers[c] + ajustment) / 8 << endl;
 
-				line(path_image, (last_centers[c] + ajustment) / 4, (centers[gm] + ajustment) / 4, color_tab[gm], 2, LINE_AA);
+				line(path_image, (last_centers[gm] + ajustment) / 8, (centers[c] + ajustment) / 8, color_tab[gm], 2, LINE_AA);
 
-				last_centers[c] = centers[gm];
+				last_centers[gm] = centers[c];
 			}
 
 			frame_count = 0;
