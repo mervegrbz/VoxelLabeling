@@ -153,6 +153,17 @@ namespace nl_uu_science_gmt
 				}
 			}
 		}
+		try {
+		path_image = Mat(m_height/2, m_height/2, CV_8UC1);
+
+		path_image = Scalar(255, 255, 255);
+
+		}
+		catch (Exception& e) {
+			cout << e.msg << endl;
+		}
+		frame_count = 0;
+
 		cout << "done!" << endl;
 	}
 
@@ -171,6 +182,10 @@ namespace nl_uu_science_gmt
 		vector<Mat> clusters(4);
 		vector<Point2f> centers;
 		kmeans(m_groundCoordinates, 4, labels, TermCriteria(TermCriteria::EPS + TermCriteria::COUNT, 10, 1.0), 3, KMEANS_PP_CENTERS, centers);
+		
+		
+		last_centers = centers;
+		
 		for (int j = 0; j < m_groundCoordinates.size(); j++)
 		{
 			int flag = labels.at<int>(j);
@@ -206,7 +221,7 @@ namespace nl_uu_science_gmt
 			}
 			imshow("EM-Segmentation", result);
 			Mat notUsed;
-			waitKey(0);
+			waitKey(1);
 			cv::TermCriteria term(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 15000, 1e-6);
 			Ptr<cv::ml::EM> gmm = cv::ml::EM::create();
 			gmm->setClustersNumber(2);
@@ -291,7 +306,7 @@ namespace nl_uu_science_gmt
 			m_visible_voxels[j]->color = color_tab[matches[flag]];
 		}
 		imshow("EM-Segmentation", result);
-		waitKey();
+		waitKey(1);
 	};
 
 	/**
@@ -302,14 +317,14 @@ namespace nl_uu_science_gmt
 	void Reconstructor::update()
 	{
 		m_visible_voxels.clear();
-		std::vector<Voxel *> visible_voxels;
+		std::vector<Voxel*> visible_voxels;
 
 		int v;
 #pragma omp parallel for schedule(static) private(v) shared(visible_voxels)
 		for (v = 0; v < (int)m_voxels_amount; ++v)
 		{
 			int camera_counter = 0;
-			Voxel *voxel = m_voxels[v];
+			Voxel* voxel = m_voxels[v];
 
 			for (size_t c = 0; c < m_cameras.size(); ++c)
 			{
@@ -355,7 +370,7 @@ namespace nl_uu_science_gmt
 		{
 			int flag = labels.at<int>(j);
 			clusters[flag].push_back(Point3d(m_visible_voxels[j]->x, m_visible_voxels[j]->y, m_visible_voxels[j]->z));
-			
+
 		}
 		for (int f = 0; f < 4; f++)
 		{
@@ -404,7 +419,7 @@ namespace nl_uu_science_gmt
 					sample.at<double>(0, 1) = static_cast<double>(g);
 					sample.at<double>(0, 2) = static_cast<double>(b);
 					totaldist += gmm->predict2(sample, noArray())[0];
-					cout<<gmm->predict2(sample, noArray())[1]<<endl;
+					//cout<<gmm->predict2(sample, noArray())[1]<<endl;
 					samples.push_back(sample);
 				}
 				if (mostprob > abs(totaldist / samples.size()))
@@ -443,6 +458,35 @@ namespace nl_uu_science_gmt
 			m_visible_voxels[j]->color = color_tab[matches[flag]];
 		}
 		imshow("EM-Segmentation", result);
+
+
+		// last centers
+
+		frame_count++;
+
+		if (frame_count > 49) {
+
+			for (int c = 0; c < last_centers.size(); c++) {
+
+				int gm = matches[c];
+
+				Point2f ajustment(m_height, m_height);
+
+				cout << (last_centers[c] + ajustment) / 4 << " " << (centers[gm] + ajustment) / 4 << endl;
+
+				line(path_image, (last_centers[c] + ajustment) / 4, (centers[gm] + ajustment) / 4, color_tab[gm], 2, LINE_AA);
+
+				last_centers[c] = centers[gm];
+			}
+
+			frame_count = 0;
+
+
+			imshow("Path", path_image);
+
+		}
+
 	}
+
 
 } /* namespace nl_uu_science_gmt */
