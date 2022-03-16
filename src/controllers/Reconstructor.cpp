@@ -153,15 +153,15 @@ namespace nl_uu_science_gmt
 				}
 			}
 		}
-		try {
-		path_image = Mat(m_height/2, m_height/2, CV_8UC1);
-
+		
+		path_image = Mat(m_height/4, m_height/4, CV_8UC3);
 		path_image = Scalar(255, 255, 255);
 
-		}
-		catch (Exception& e) {
-			cout << e.msg << endl;
-		}
+		directions = vector<Vec2f>(4);
+
+		directions_found = false;
+
+
 		frame_count = 0;
 
 		cout << "done!" << endl;
@@ -464,21 +464,75 @@ namespace nl_uu_science_gmt
 
 		frame_count++;
 
-		if (frame_count > 49) {
+		if (frame_count > 24) {
 
-			for (int c = 0; c < last_centers.size(); c++) {
+			if (directions_found) {
 
-				int gm = matches[c];
 
-				Point2f ajustment(m_height, m_height);
 
-				cout << (last_centers[c] + ajustment) / 4 << " " << (centers[gm] + ajustment) / 4 << endl;
+				for (int c = 0; c < last_centers.size(); c++) {
 
-				line(path_image, (last_centers[c] + ajustment) / 4, (centers[gm] + ajustment) / 4, color_tab[gm], 2, LINE_AA);
+					int best_c = -1;
+					float smallest_dist = FLT_MAX;
 
-				last_centers[c] = centers[gm];
+					Vec2f direction;
+
+
+					Point2f ajustment(m_height, m_height);
+
+
+					for (int nc = 0; nc < matches.size(); nc++) {
+					
+						Vec2f new_vec(centers[nc] - last_centers[nc]);
+						new_vec = normalize(new_vec);
+
+						float dist = new_vec.dot(directions[c]); // normalized, magnitude should both be 1
+
+						if (smallest_dist > dist) {
+							
+							direction = new_vec;
+							smallest_dist = dist;
+							best_c = nc;
+						}
+					}
+
+
+
+					 
+
+					Scalar boop(100, 0, 0);
+
+					//cout << color_tab[c] << endl;
+
+					line(path_image, (last_centers[c] + ajustment) / 8, (centers[best_c] + ajustment) / 8, color_tab[c], 5, FILLED);
+
+					last_centers[c] = centers[best_c];
+
+
+				}
 			}
+			else {
+			
 
+				for (int c = 0; c < last_centers.size(); c++) {
+
+					int gm = matches[c];
+
+					Point2f ajustment(m_height, m_height);
+
+					cout << (last_centers[c] + ajustment) / 8 << " " << (centers[gm] + ajustment) / 8 << endl;
+
+					line(path_image, (last_centers[c] + ajustment) / 8, (centers[gm] + ajustment) / 8, color_tab[c], 10, FILLED);
+
+					directions[c] = normalize(Vec2f(centers[gm] - last_centers[c]));
+					last_centers[c] = centers[gm];
+
+					
+				}
+
+				directions_found = true;
+			
+			}
 			frame_count = 0;
 
 

@@ -63,6 +63,8 @@ private:
 	std::vector<Voxel*> m_visible_voxels;   // Pointer vector to all visible voxels
 
 	std::vector<cv::Point2f> last_centers;
+	std::vector<cv::Vec2f> directions;
+	bool directions_found;
 	cv::Mat path_image;
 	int frame_count;
 
