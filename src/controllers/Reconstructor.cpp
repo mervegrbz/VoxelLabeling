@@ -474,6 +474,15 @@ namespace nl_uu_science_gmt
 
 			if (directions_found) {
 
+
+				vector<bool> avilable(4, true);
+
+
+				//Mat results (4,4, F)
+
+
+
+
 				for (int c = 0; c < last_centers.size(); c++) {
 
 					int best_c = -1;
@@ -487,26 +496,34 @@ namespace nl_uu_science_gmt
 
 					for (int nc = 0; nc < matches.size(); nc++) {
 					
-						Vec2f new_vec(centers[nc] - last_centers[c]);
-						new_vec = normalize(new_vec);
 
-						float cosine_dist = 1  - new_vec.dot(directions[c]); // normalized, magnitude should both be 1
+						if (avilable[nc]) {
+
+							cout << c << endl;
+
+							Vec2f new_vec(centers[nc] - last_centers[c]);
+							new_vec = normalize(new_vec);
+
+							float cosine_dist = 1  - new_vec.dot(directions[c]); // normalized, magnitude should both be 1
 
 
-						norm(centers[nc] - last_centers[c]);
+							norm(centers[nc] - last_centers[c]);
 
-						float distance = norm(centers[nc] - last_centers[c]);
+							float distance = norm(centers[nc] - last_centers[c]);
 
 
-						if (smallest_dist > (cosine_dist * distance * distance) ){
+							if (smallest_dist > (cosine_dist * distance * distance) ){
 							
-							direction = new_vec;
-							smallest_dist = cosine_dist;
-							best_c = nc;
+								direction = new_vec;
+								smallest_dist = cosine_dist;
+								best_c = nc;
+							}
 						}
 					}
 
-					Scalar boop(100, 0, 0);
+
+					cout << "Best C " << best_c << endl;
+					avilable[best_c] = false;
 
 					cout << (last_centers[c] + ajustment) / 8 << " " << (centers[best_c] + ajustment) / 8 << endl;
 
